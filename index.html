@@ -147,7 +147,7 @@
 					if(localStorage.list) {
 						gethtml();
 					} else {
-						$.get("http://www.fanqianbb.com/item/listTkzs.htm?pageno=" + pageno, function(result) {
+						$.get("https://www.fanqianbb.com/item/listTkzs.htm?pageno=" + pageno, function(result) {
 							$("#count").html(pageno);
 							var temp = result.r.listObjs;
 							if(temp.length > 0) {
