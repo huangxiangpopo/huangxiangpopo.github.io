@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+
+		<link href="http://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+		<style type="text/css">
+			* {
+				margin: 0;
+				padding: 0;
+			}
+			
+			.a {
+				display: block;
+				width: 300px;
+				height: 350px;
+			}
+			
+			.good-pt {
+				display: inline-block;
+				width: 15px;
+				height: 15px;
+				vertical-align: middle;
+				margin-right: 2px;
+				position: relative;
+				top: -1px;
+			}
+			
+			.good-pt-1 {
+				background: url(http://www.fanqianbb.com/static/images/icon-taobao.png) no-repeat;
+			}
+			
+			.good-pt-2 {
+				background: url(http://www.fanqianbb.com/static/images/icon-tmall.png) no-repeat;
+			}
+			
+			.title1 {
+				font-size: 14px;
+				width: 96%;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				margin-bottom: 5px;
+				display: block;
+				height: 20px;
+			}
+			
+			ul {
+				list-style: none;
+				display: flex;
+				flex-wrap: wrap;
+			}
+			body{
+				display: flex;
+				min-height: 100vh;
+				flex-direction: column;
+			}
+			header{
+				
+			}
+			footer{
+				
+			}
+		</style>
+	</head>
+
+	<body>
+		<header>
+
+		</header>
+		<div class="">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-xs-4 col-sm-2 col-md-1">
+						<button class="btn btn-primary" id="clear">清除缓存</button>
+					</div>
+					<div class="col-xs-4 col-sm-2 col-md-1">
+						<button class="btn btn-primary" id="originalPriceYuan" data-test="1" data-text="价格">价格</button>
+					</div>
+					<div class="col-xs-4 col-sm-2 col-md-1">
+						<button class="btn btn-primary" id="coupon" data-test="1" data-text="券">券</button>
+					</div>
+					<div class="col-xs-4 col-sm-2 col-md-1">
+						<button class="btn btn-primary" id="ratePc" data-test="1" data-text="返利">返利</button>
+					</div>
+					<div class="col-xs-4 col-sm-2 col-md-1">
+						<button class="btn btn-primary" id="priceAloneYuan" data-test="1" data-text="到手价">到手价</button>
+					</div>
+					<div class="col-xs-4 col-sm-2 col-md-1">
+						<input type="text" class="form-control" id="search-text" />
+					</div>
+					<div class="col-xs-4 col-sm-2 col-md-1">
+						<button class="btn btn-primary" id="search">搜索</button>
+					</div>
+					<div class="col-xs-4 col-sm-2 col-md-1">
+						<span id="count"></span>
+					</div>
+					<div class="col-xs-4 col-sm-2 col-md-1">
+						<span id="total"></span>
+					</div>
+				</div>
+				<div style="display: flex;flex-direction: row;flex-wrap: wrap;justify-content: space-between;">
+
+				</div>
+
+				<div id="example"></div>
+			</div>
+		</div>
+		<footer>
+
+		</footer>
+
+		<script type="text/template" id="tpl">
+			<% _.each(list, function(obj){ %>
+			<li class="a">
+				<a target="blank" href="<%= obj.itemUrl %>">
+					<img width="285" height="285" data-original="<%= obj.imageUrl %>" class="lazy">
+				</a>
+				<a class="title1" target="blank" href="<%= obj.itemUrl %>">
+
+					<span class="good-pt good-pt-<%= obj.siteId %>"></span>
+					<%= obj.title %>
+				</a>
+
+				<em>￥</em>
+				<%= obj.originalPriceYuan %>
+				<a target="blank" href="<%= obj.pcCouponURL %>">
+					领
+					<%= (obj.coupon / 100).toFixed(0) %>元券</a>
+				返
+				<%= obj.ratePc %>%
+				<span>   到手<font style="color:red"><%= obj.priceAloneYuan %></font></span>
+
+			</li>
+			<% }); %>
+		</script>
+		<script src="http://cdn.bootcss.com/jquery/1.11.2/jquery.min.js"></script>
+		<script src="http://cdn.bootcss.com/underscore.js/1.8.3/underscore-min.js"></script>
+		<script src="http://cdn.bootcss.com/jquery_lazyload/1.9.7/jquery.lazyload.min.js"></script>
+		<script type="text/javascript">
+			$(function() {
+				var pageno = 1;
+				var listObjs = [];
+				var b = function() {
+					if(localStorage.list) {
+						gethtml();
+					} else {
+						$.get("http://www.fanqianbb.com/item/listTkzs.htm?pageno=" + pageno, function(result) {
+							$("#count").html(pageno);
+							var temp = result.r.listObjs;
+							if(temp.length > 0) {
+								listObjs = listObjs.concat(temp);
+								pageno++;
+								b();
+							} else {
+
+								localStorage.setItem("list", JSON.stringify(listObjs));
+								gethtml();
+							}
+						});
+					}
+				};
+
+				function gethtml(a, b, c) {
+
+					var list = JSON.parse(localStorage.getItem("list"));
+					if(b) {
+
+						list = list.sort(function(x, y) {
+							if(a) {
+								return x[b] - y[b];
+							} else {
+								return y[b] - x[b];
+							}
+						});
+					}
+					if(c) {
+						var temp = [];
+						list.map(function(item) {
+
+							if((item.title).indexOf(c) >= 0) {
+
+								temp.push(item);
+							}
+						});
+						list = temp;
+					}
+					var html = _.template($('#tpl').html())({
+						"list": list
+					});
+					$("#total").html(list.length);
+					$("#example").html("<ul>" + html + "</ul>");
+					$("img.lazy").lazyload();
+
+				};
+				b();
+				$("#clear").click(function() {
+					window.localStorage.clear();
+					window.location.reload(true);
+				});
+
+				$("#originalPriceYuan,#coupon,#ratePc,#priceAloneYuan").bind("click", function() {
+					var a = $(this).attr("data-test") - 0;
+
+					if(a) {
+						$(this).html($(this).attr("data-text") + "↓");
+						$(this).attr("data-test", --a);
+					} else {
+						$(this).html($(this).attr("data-text") + "↑");
+						$(this).attr("data-test", ++a);
+					}
+					gethtml(a, this.id);
+
+					/*$(this).bind("click", function() {
+							console.log("11");
+					});*/
+
+				});
+				$("#search").click(function() {
+					gethtml(undefined, undefined, $("#search-text").val());
+				});
+			});
+		</script>
+	</body>
+
+</html>
